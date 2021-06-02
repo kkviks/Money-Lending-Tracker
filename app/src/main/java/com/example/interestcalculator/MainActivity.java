@@ -5,11 +5,8 @@ import android.app.DatePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +24,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     private Button btn_start_date, btn_end_date,btn_calc;
     private TextView txtNumDays,txtPrincipalAmount;
-    private TableLayout table;
     private double RATE_PER_MONTH = 2.0;
     private boolean startOrEnd = true;
     private int numDays=-1;
@@ -58,12 +54,11 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         });
 
         txtNumDays = findViewById(R.id.textNumDays);
-        txtNumDays.setVisibility(View.GONE);
-
-        table = findViewById(R.id.table);
-        table.setStretchAllColumns(true);
 
         txtPrincipalAmount = findViewById(R.id.txtPrincipalAmount);
+
+        TextView output = findViewById(R.id.res);
+        output.setText("Hiiiiiiiiii!");
 
         btn_calc = findViewById(R.id.btn_calc);
         btn_calc.setOnClickListener(new View.OnClickListener() {
@@ -122,67 +117,40 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private void renderTable(double p, int curr_days) {
         //https://stackoverflow.com/questions/24078275/how-to-add-a-row-dynamically-in-a-tablelayout-in-android
 
-        Toast.makeText(getApplicationContext(),"Inside Render!",Toast.LENGTH_SHORT).show();
 
         int row_count = (int) Math.ceil((double)curr_days/365.0);
 
-        TextView year[] = new TextView[row_count];
-        TextView days[] = new TextView[row_count];
-        TextView interest[] = new TextView[row_count];
-        TextView principal[] = new TextView[row_count];
-        TextView total[] = new TextView[row_count];
-
-        TableRow tr_head[] = new TableRow[row_count];
-
-        char yearNum = '1';
-        int i = 0;
+        int i = 1;
 
         row_count+=2; //For safe id naming
+        String ans = "(Year, Days, Interest, Principal, Total):\n\n";
 
         double itr, pr_year,tot;
 
         while(curr_days>0){
+            ans += String.valueOf(i++);
             if(curr_days>=365){
-                itr = p*(RATE_PER_MONTH/30.42)*(365)/100.0;
+                itr = p*(RATE_PER_MONTH/30.42)*(365)/(double)100.0;
                 pr_year = p; tot = pr_year+itr;
                 p = tot;
                 curr_days-=365;
-                days[i].setText("365");
-                days[i].setId(i+2*row_count);
+                ans += " 365 ";
             }else{
                 pr_year = p;
                 itr = p*(RATE_PER_MONTH/30.42)*(curr_days)/100.0;
                 tot = pr_year+itr;
                 p = tot;
-                days[i].setText(String.valueOf(curr_days));
-                curr_days = 0;
+                ans+= String.valueOf(curr_days);
+                curr_days = -1;
             }
-            year[i].setText("Year "+String.valueOf(yearNum++));
-            interest[i].setText(String.valueOf(itr));
-            principal[i].setText(String.valueOf(pr_year));
-            total[i].setText(String.valueOf(tot));
-
-            year[i].setId(i+1*row_count);
-            days[i].setId(i+2*row_count);
-            interest[i].setId(i+3*row_count);
-            principal[i].setId(i+4*row_count);
-            total[i].setId(i+5*row_count);
-
-            tr_head[i] = new TableRow(this);
-            tr_head[i].setId(i+1);
-            tr_head[i].setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT));
-
-            tr_head[i].addView(year[i]);
-            tr_head[i].addView(days[i]);
-            tr_head[i].addView(interest[i]);
-            tr_head[i].addView(principal[i]);
-            tr_head[i].addView(total[i]);
-
-            table.addView(tr_head[i],new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            Toast.makeText(getApplicationContext(),String.valueOf(tot),Toast.LENGTH_LONG).show();
-            txtPrincipalAmount.setText(String.valueOf(tot));
+            ans += String.valueOf((int)(itr)) + " ";
+            ans += String.valueOf((int)(pr_year))+" ";
+            ans += String.valueOf((int)(tot)) + "\n\n";
         }
-
+        TextView output = findViewById(R.id.res);
+        output.setVisibility(View.VISIBLE);
+        output.setText(ans);
+        Toast.makeText(getApplicationContext(),ans,Toast.LENGTH_LONG).show();
     }
 
     @Override
